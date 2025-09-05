@@ -34,16 +34,21 @@ export default function RoomPage() {
 
     // Listen for real-time updates
     socketInstance.on('room-data', (data) => {
-      setTitle(data.title || '');
+      console.log('Received room-data:', data);
+      // Ensure proper title handling even for empty strings
+      setTitle(data.title !== undefined ? data.title : '');
       setContent(data.content || '');
     });
 
     socketInstance.on('content-changed', (data) => {
+      console.log('Received content-changed:', data);
       setContent(data.content);
     });
 
     socketInstance.on('title-changed', (data) => {
-      setTitle(data.title);
+      console.log('Received title-changed:', data);
+      // Ensure proper title handling even for empty strings
+      setTitle(data.title !== undefined ? data.title : '');
     });
 
     // Fetch initial room data
@@ -53,17 +58,25 @@ export default function RoomPage() {
       socketInstance.emit('leave-room', roomId);
       socketInstance.disconnect();
     };
-  }, [roomId]);
+  }, [roomId]); // Added fetchRoom dependency warning fix
 
-  const fetchRoom = async () => {
+  // Add fetchRoom as a separate useCallback to avoid dependency issues
+  const fetchRoom = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/rooms/${roomId}`);
       if (response.ok) {
         const roomData = await response.json();
         setRoom(roomData);
-        setTitle(roomData.title || '');
-        setContent(roomData.content || '');
+        
+        // Ensure title is properly loaded, even if it's an empty string
+        const roomTitle = roomData.title !== undefined ? roomData.title : '';
+        const roomContent = roomData.content || '';
+        
+        setTitle(roomTitle);
+        setContent(roomContent);
+        
+        console.log('Room loaded - Title:', `"${roomTitle}"`, 'Content length:', roomContent.length);
       } else {
         toast.error('Failed to load room');
       }
@@ -73,7 +86,7 @@ export default function RoomPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [roomId]);
 
   const saveToDatabase = async (newTitle?: string, newContent?: string) => {
     try {
@@ -212,6 +225,7 @@ export default function RoomPage() {
             onChange={(e) => handleTitleChange(e.target.value)}
             className="text-lg sm:text-xl font-semibold bg-transparent border-none outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 flex-1 min-w-0 truncate"
             placeholder="Untitled Document"
+            style={{ minWidth: '200px' }}
           />
         </div>
         <div className="flex items-center space-x-2 flex-shrink-0 ml-2">

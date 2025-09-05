@@ -30,22 +30,56 @@ import {
   Separator,
   InsertCodeBlock,
   ChangeCodeMirrorLanguage,
+  InsertSandpack,
+  HighlightToggle,
+  
   type MDXEditorMethods,
+  type SandpackConfig,
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
 
-// Sample Sandpack config for demonstration
-const virtuosoSampleSandpackConfig = {
-  files: {
-    '/App.js': {
-      code: `export default function App() {
-  return <h1>Hello Sandpack!</h1>;
-}`,
-      active: true,
-    },
-  },
-  template: 'react',
-};
+const defaultSnippetContent = `
+export default function App() {
+  return (
+    <div className="App">
+      <h1>Hello CodeSandbox</h1>
+      <h2>Start editing to see some magic happen!</h2>
+    </div>
+  );
+}
+`.trim()
+
+const simpleSandpackConfig: SandpackConfig = {
+  defaultPreset: 'react',
+  presets: [
+    {
+      label: 'React',
+      name: 'react',
+      meta: 'live react',
+      sandpackTemplate: 'react',
+      sandpackTheme: 'light',
+      snippetFileName: '/App.js',
+      snippetLanguage: 'jsx',
+      initialSnippetContent: defaultSnippetContent
+    }
+  ]
+}
+
+const nextjsSandpackConfig: SandpackConfig = {
+  defaultPreset: 'nextjs',
+  presets: [
+    {
+      label: 'Next.js',
+      name: 'nextjs',
+      meta: 'live nextjs',
+      sandpackTemplate: 'nextjs',
+      sandpackTheme: 'light',
+      snippetFileName: '/pages/index.js',
+      snippetLanguage: 'jsx',
+      initialSnippetContent: defaultSnippetContent
+    }
+  ]
+}
 
 interface MDXEditorComponentProps {
   content: string;
@@ -61,8 +95,28 @@ export function MDXEditorComponent({ content, onChange }: MDXEditorComponentProp
     }
   }, [content]);
 
+  // Handle click to focus the editor only when not already focused
+  const handleEditorClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    
+    // Check if clicking on the editor area
+    const editorArea = target.closest('.mdxeditor-rich-text-editor');
+    
+    // Skip if not clicking on editor area
+    if (!editorArea) return;
+
+    if(editorArea.contains(document.activeElement)) {
+      return; // Already focused
+    }
+    // Only focus if not already focused and clicking outside ProseMirror but inside editor area
+    if (editorRef.current) {
+      event.preventDefault();
+      editorRef.current.focus();
+    }
+  };
+
   return (
-    <div className="h-full w-full relative">
+    <div className="h-full w-full relative" onClick={handleEditorClick}>
       <MDXEditor
         ref={editorRef}
         markdown={content}
@@ -93,22 +147,41 @@ export function MDXEditorComponent({ content, onChange }: MDXEditorComponentProp
           tablePlugin(),
           
           // Code plugins
-          codeBlockPlugin({ defaultCodeBlockLanguage: 'javascript' }),
+          codeBlockPlugin({ 
+            defaultCodeBlockLanguage: 'javascript',
+            codeBlockEditorDescriptors: []
+          }),
           codeMirrorPlugin({
             codeBlockLanguages: {
+              '': 'Plain text',
+              txt: 'Text',
+              text: 'Text',
               js: 'JavaScript',
               javascript: 'JavaScript',
+              jsx: 'JavaScript (React)',
               ts: 'TypeScript',
               typescript: 'TypeScript',
               tsx: 'TypeScript (React)',
-              jsx: 'JavaScript (React)',
+              py: 'Python',
+              python: 'Python',
+              java: 'Java',
               css: 'CSS',
               html: 'HTML',
+              xml: 'XML',
               json: 'JSON',
+              md: 'Markdown',
               markdown: 'Markdown',
-              python: 'Python',
               bash: 'Bash',
+              sh: 'Shell',
               sql: 'SQL',
+              yaml: 'YAML',
+              yml: 'YAML',
+              php: 'PHP',
+              go: 'Go',
+              rust: 'Rust',
+              c: 'C',
+              cpp: 'C++',
+              'c++': 'C++',
             },
           }),
           
@@ -119,8 +192,7 @@ export function MDXEditorComponent({ content, onChange }: MDXEditorComponentProp
           frontmatterPlugin(),
           
           // Sandpack plugin for live code execution
-          sandpackPlugin({ sandpackConfig: virtuosoSampleSandpackConfig }),
-          
+          sandpackPlugin({ sandpackConfig: simpleSandpackConfig }),
           // Toolbar plugin with responsive design
           toolbarPlugin({
             toolbarContents: () => (
@@ -129,18 +201,20 @@ export function MDXEditorComponent({ content, onChange }: MDXEditorComponentProp
                 <Separator />
                 <BoldItalicUnderlineToggles />
                 <CodeToggle />
+                <HighlightToggle />
+                <Separator />
+                <ListsToggle />
                 <Separator />
                 <BlockTypeSelect />
                 <Separator />
                 <CreateLink />
                 <InsertImage />
                 <Separator />
-                <ListsToggle />
-                <Separator />
                 <InsertTable />
                 <InsertThematicBreak />
                 <Separator />
                 <InsertCodeBlock />
+                <InsertSandpack />
               </>
             ),
           }),

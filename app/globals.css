@@ -362,7 +362,12 @@ input[type="text"], textarea {
 .prose {
   max-width: none;
   color: #374151;
-  line-height: 1.2;
+  line-height: 1.5;
+}
+
+.prose p {
+  margin-bottom: 0.5rem!important;
+  margin-top: 0rem!important;
 }
 
 .prose li {
@@ -448,11 +453,11 @@ img {
   max-width: 500px;
 }
 
-/* .prose hr{
+.prose hr{
   margin: 1rem 0!important;
   border: none;
   border-top: 1px solid #d1d5db;
-} */
+}
 
 .cm-scroller{
   margin-top: 3rem;
