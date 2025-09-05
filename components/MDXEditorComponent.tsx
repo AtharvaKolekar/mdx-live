@@ -1,5 +1,5 @@
 'use client';
-import prose from "@tailwindcss/typography";
+
 import React, { useEffect, useRef } from 'react';
 import {
   MDXEditor,
@@ -38,18 +38,8 @@ import {
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
 
-const defaultSnippetContent = `
-export default function App() {
-  return (
-    <div className="App">
-      <h1>Hello CodeSandbox</h1>
-      <h2>Start editing to see some magic happen!</h2>
-    </div>
-  );
-}
-`.trim()
-
-const simpleSandpackConfig: SandpackConfig = {
+// Optimized Sandpack config - single preset for performance
+const optimizedSandpackConfig: SandpackConfig = {
   defaultPreset: 'react',
   presets: [
     {
@@ -60,23 +50,13 @@ const simpleSandpackConfig: SandpackConfig = {
       sandpackTheme: 'light',
       snippetFileName: '/App.js',
       snippetLanguage: 'jsx',
-      initialSnippetContent: defaultSnippetContent
-    }
-  ]
-}
-
-const nextjsSandpackConfig: SandpackConfig = {
-  defaultPreset: 'nextjs',
-  presets: [
-    {
-      label: 'Next.js',
-      name: 'nextjs',
-      meta: 'live nextjs',
-      sandpackTemplate: 'nextjs',
-      sandpackTheme: 'light',
-      snippetFileName: '/pages/index.js',
-      snippetLanguage: 'jsx',
-      initialSnippetContent: defaultSnippetContent
+      initialSnippetContent: `export default function App() {
+  return (
+    <div className="App">
+      <h1>Hello CodeSandbox</h1>
+    </div>
+  );
+}`.trim()
     }
   ]
 }
@@ -155,33 +135,13 @@ export function MDXEditorComponent({ content, onChange }: MDXEditorComponentProp
             codeBlockLanguages: {
               '': 'Plain text',
               txt: 'Text',
-              text: 'Text',
               js: 'JavaScript',
-              javascript: 'JavaScript',
               jsx: 'JavaScript (React)',
               ts: 'TypeScript',
-              typescript: 'TypeScript',
               tsx: 'TypeScript (React)',
-              py: 'Python',
-              python: 'Python',
-              java: 'Java',
-              css: 'CSS',
               html: 'HTML',
-              xml: 'XML',
+              css: 'CSS',
               json: 'JSON',
-              md: 'Markdown',
-              markdown: 'Markdown',
-              bash: 'Bash',
-              sh: 'Shell',
-              sql: 'SQL',
-              yaml: 'YAML',
-              yml: 'YAML',
-              php: 'PHP',
-              go: 'Go',
-              rust: 'Rust',
-              c: 'C',
-              cpp: 'C++',
-              'c++': 'C++',
             },
           }),
           
@@ -192,7 +152,7 @@ export function MDXEditorComponent({ content, onChange }: MDXEditorComponentProp
           frontmatterPlugin(),
           
           // Sandpack plugin for live code execution
-          sandpackPlugin({ sandpackConfig: simpleSandpackConfig }),
+          sandpackPlugin({ sandpackConfig: optimizedSandpackConfig }),
           // Toolbar plugin with responsive design
           toolbarPlugin({
             toolbarContents: () => (
