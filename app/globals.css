@@ -1,26 +1,394 @@
 @import "tailwindcss";
+@plugin '@tailwindcss/typography';
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground: #1f2937;
+  --editor-bg: #fafafa;
+  --editor-border: #e5e7eb;
+  --toolbar-bg: #ffffff;
+  --accent-color: #3b82f6;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  line-height: 1.2;
+}
+
+/* Prevent text selection issues and improve responsiveness */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* MDX Editor Theme - Improved visibility */
+.mdxeditor {
+  --color-accent: var(--accent-color);
+  --color-border: var(--editor-border);
+  --color-surface: var(--toolbar-bg);
+  --color-on-surface: var(--foreground);
+  --color-neutral: #6b7280;
+  --color-neutral-surface: #f3f4f6;
+  background: var(--editor-bg);
+  height: 100% !important;
+}
+
+.mdxeditor-toolbar {
+  border-bottom: 1px solid var(--editor-border) !important;
+  padding: 8px 12px !important;
+  background: var(--toolbar-bg) !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+}
+
+/* Toolbar scrollbar styling */
+.mdxeditor-toolbar::-webkit-scrollbar {
+  height: 4px !important;
+}
+
+.mdxeditor-toolbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.mdxeditor-toolbar::-webkit-scrollbar-thumb {
+  background: #d1d5db !important;
+  border-radius: 2px !important;
+}
+
+.mdxeditor-toolbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af !important;
+}
+
+/* Ensure toolbar items don't shrink */
+.mdxeditor-toolbar > * {
+  flex-shrink: 0 !important;
+}
+
+/* Make toolbar responsive */
+@media (max-width: 640px) {
+  .mdxeditor-toolbar {
+    padding: 6px 8px !important;
+    min-height: 44px !important;
+  }
+  
+  .mdxeditor-toolbar button {
+    min-width: 32px !important;
+    height: 32px !important;
+    padding: 4px !important;
+  }
+}
+
+.mdxeditor-rich-text-editor {
+  height: calc(100vh - 108px) !important;
+  overflow-y: auto !important;
+  background: var(--editor-bg) !important;
+}
+
+.mdxeditor-rich-text-editor .ProseMirror {
+  height: 100% !important;
+  padding: 16px !important;
+  outline: none !important;
+  color: var(--foreground) !important;
+  background: transparent !important;
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+}
+
+/* Responsive padding for mobile */
+@media (max-width: 640px) {
+  .mdxeditor-rich-text-editor .ProseMirror {
+    padding: 12px !important;
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+}
+
+/* Ensure the editor takes full height */
+.mdxeditor-root-contenteditable {
+  height: 100% !important;
+}
+
+/* Improve text visibility and contrast */
+.ProseMirror p {
+  color: var(--foreground) !important;
+  margin: 0 0 1em 0 !important;
+}
+
+.ProseMirror h1, .ProseMirror h2, .ProseMirror h3, .ProseMirror h4, .ProseMirror h5, .ProseMirror h6 {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  margin: 1.5em 0 0.5em 0 !important;
+}
+
+.ProseMirror h1 { font-size: 2em !important; }
+.ProseMirror h2 { font-size: 1.5em !important; }
+.ProseMirror h3 { font-size: 1.25em !important; }
+
+.ProseMirror ul, .ProseMirror ol {
+  color: var(--foreground) !important;
+  padding-left: 1.5em !important;
+  margin: 1em 0 !important;
+}
+
+.ProseMirror li {
+  color: var(--foreground) !important;
+  margin: 0.25em 0 !important;
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid var(--accent-color) !important;
+  padding-left: 1em !important;
+  margin: 1em 0 !important;
+  color: #6b7280 !important;
+  font-style: italic !important;
+}
+
+.ProseMirror code {
+  background-color: #f1f5f9 !important;
+  color: #e11d48 !important;
+  padding: 0.125em 0.25em !important;
+  border-radius: 0.25em !important;
+  font-size: 0.875em !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+}
+
+.ProseMirror pre {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  padding: 1em !important;
+  border-radius: 0.5em !important;
+  overflow-x: auto !important;
+  margin: 1em 0 !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+}
+
+.ProseMirror pre code {
+  background: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+}
+
+.ProseMirror table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border: 1px solid var(--editor-border) !important;
+  margin: 1em 0 !important;
+}
+
+.ProseMirror th, .ProseMirror td {
+  border: 1px solid var(--editor-border) !important;
+  padding: 0.5em 0.75em !important;
+  color: var(--foreground) !important;
+}
+
+.ProseMirror th {
+  background-color: #f9fafb !important;
+  font-weight: 600 !important;
+}
+
+/* Strong/Bold text visibility */
+.ProseMirror strong, .ProseMirror b {
+  color: #111827 !important;
+  font-weight: 700 !important;
+}
+
+/* Italic text visibility */
+.ProseMirror em, .ProseMirror i {
+  color: var(--foreground) !important;
+  font-style: italic !important;
+}
+
+/* Link styling */
+.ProseMirror a {
+  color: var(--accent-color) !important;
+  text-decoration: underline !important;
+}
+
+.ProseMirror a:hover {
+  color: #1d4ed8 !important;
+}
+
+/* Selection styling */
+.ProseMirror ::selection {
+  background: #dbeafe !important;
+  color: inherit !important;
+}
+
+/* Placeholder text */
+.ProseMirror .is-empty:before {
+  content: attr(data-placeholder);
+  color: #9ca3af !important;
+  font-style: italic !important;
+  pointer-events: none !important;
+  position: absolute !important;
+}
+
+/* Additional responsive styles */
+@media (max-width: 768px) {
+  .mdxeditor-rich-text-editor {
+    height: calc(100dvh - 200px) !important;
+  }
+}
+
+/* Prevent zoom on input focus on iOS */
+input[type="text"], textarea {
+  font-size: 16px !important;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 640px) {
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Hide scrollbars but keep functionality */
+.mdxeditor-rich-text-editor::-webkit-scrollbar {
+  width: 8px;
+}
+
+.mdxeditor-rich-text-editor::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mdxeditor-rich-text-editor::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.mdxeditor-rich-text-editor::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Ensure proper mobile behavior */
+@media (max-width: 640px) {
+  .mdxeditor-toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .mdxeditor-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.prose {
+  max-width: none;
+  color: #374151;
+  line-height: 1.2;
+}
+
+.prose li {
+  margin-bottom: 0.25rem;
+}
+
+.prose blockquote {
+  border-left: 4px solid #d1d5db;
+  padding-left: 1rem;
+  font-style: italic;
+  margin: 1rem 0;
+}
+
+.prose code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.prose pre {
+  background-color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #d1d5db;
+  margin: 1rem 0;
+}
+
+.prose th, .prose td {
+  border: 1px solid #d1d5db;
+  padding: 0.75rem;
+}
+
+.prose th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+.prose ul {
+  list-style: disc;
+  padding-left: 2.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 5rem!important;
+}
+
+.prose ol {
+  list-style: decimal;
+  padding-left: 2.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* h1, h2, h3, h4, h5, h6 {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+} */
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+/* blockquote {
+    font-weight: 500;
+    font-style: italic;
+    color: var(--tw-prose-quotes);
+    border-left-width: .25rem;
+    border-left-color: var(--tw-prose-quote-borders);
+    quotes: "\201C" "\201D" "\2018" "\2019";
+    margin-top: 1.6em;
+    margin-bottom: 1.6em;
+    padding-left: 1em;
+} */
+
+img {
+  max-width: 500px;
+}
+
+/* .prose hr{
+  margin: 1rem 0!important;
+  border: none;
+  border-top: 1px solid #d1d5db;
+} */
+
+.cm-scroller{
+  margin-top: 3rem;
 }
