@@ -98,9 +98,40 @@ body {
 }
 
 .mdxeditor-rich-text-editor {
-  height: calc(100vh - 108px) !important;
+  height: calc(100vh - 60px - 48px) !important;
   overflow-y: auto !important;
   background: var(--editor-bg) !important;
+  cursor: text !important;
+  touch-action: manipulation !important;
+}
+
+/* Make the entire editor area clickable and focusable */
+.mdxeditor-rich-text-editor:hover {
+  background: var(--editor-bg) !important;
+}
+
+/* Ensure click-to-focus works throughout the editor */
+.mdxeditor-rich-text-editor * {
+  cursor: text !important;
+}
+
+/* Override cursor for interactive elements */
+.mdxeditor-rich-text-editor button,
+.mdxeditor-rich-text-editor input,
+.mdxeditor-rich-text-editor select,
+.mdxeditor-rich-text-editor textarea,
+.mdxeditor-rich-text-editor a {
+  cursor: pointer !important;
+}
+
+/* Improve mobile touch handling */
+@media (max-width: 768px) {
+  .mdxeditor-rich-text-editor {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
 }
 
 .mdxeditor-rich-text-editor .ProseMirror {
@@ -111,6 +142,8 @@ body {
   background: transparent !important;
   font-size: 16px !important;
   line-height: 1.6 !important;
+  cursor: text !important;
+  min-height: calc(100vh - 108px) !important;
 }
 
 /* Responsive padding for mobile */
@@ -118,7 +151,39 @@ body {
   .mdxeditor-rich-text-editor .ProseMirror {
     padding: 12px !important;
     font-size: 16px !important; /* Prevent zoom on iOS */
+    min-height: calc(100vh - 108px) !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
   }
+}
+
+/* Ensure the editor wrapper is clickable */
+.mdxeditor-root-contenteditable {
+  height: 100% !important;
+  cursor: text !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Make empty editor areas still clickable */
+.mdxeditor-rich-text-editor .ProseMirror:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  font-style: italic;
+  pointer-events: none;
+  position: absolute;
+}
+
+/* Improve mobile focus detection */
+.mdxeditor-rich-text-editor .ProseMirror:focus-visible {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: -2px !important;
+  border-radius: 4px !important;
+}
+
+/* Ensure focus styles are visible */
+.mdxeditor-rich-text-editor .ProseMirror:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Ensure the editor takes full height */

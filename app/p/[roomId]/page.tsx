@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
+import { toast } from 'sonner';
+import { useDebouncedCallback } from 'use-debounce';
 import { MDXEditorComponent } from '@/components/MDXEditorComponent';
 
 interface Room {
@@ -62,9 +64,12 @@ export default function RoomPage() {
         setRoom(roomData);
         setTitle(roomData.title || '');
         setContent(roomData.content || '');
+      } else {
+        toast.error('Failed to load room');
       }
     } catch (error) {
       console.error('Error fetching room:', error);
+      toast.error('Error loading room');
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +77,7 @@ export default function RoomPage() {
 
   const saveToDatabase = async (newTitle?: string, newContent?: string) => {
     try {
-      await fetch(`/api/rooms/${roomId}`, {
+      const response = await fetch(`/api/rooms/${roomId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,33 +87,66 @@ export default function RoomPage() {
           content: newContent !== undefined ? newContent : content,
         }),
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save');
+      }
     } catch (error) {
       console.error('Error saving to database:', error);
+      toast.error('Failed to save changes');
     }
   };
 
+  // Debounced save functions
+  const debouncedSaveTitle = useDebouncedCallback(
+    (newTitle: string) => {
+      saveToDatabase(newTitle);
+    },
+    1000
+  );
+
+  const debouncedSaveContent = useDebouncedCallback(
+    (newContent: string) => {
+      saveToDatabase(undefined, newContent);
+    },
+    1000
+  );
+
+  // Debounced real-time updates (shorter delay for better UX)
+  const debouncedTitleBroadcast = useDebouncedCallback(
+    (newTitle: string) => {
+      if (socket) {
+        socket.emit('title-change', { roomId, title: newTitle });
+      }
+    },
+    300
+  );
+
+  const debouncedContentBroadcast = useDebouncedCallback(
+    (newContent: string) => {
+      if (socket) {
+        socket.emit('content-change', { roomId, content: newContent });
+      }
+    },
+    300
+  );
+
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    if (socket) {
-      socket.emit('title-change', { roomId, title: newTitle });
-    }
-    // Debounced save to database
-    setTimeout(() => saveToDatabase(newTitle), 1000);
+    debouncedTitleBroadcast(newTitle);
+    debouncedSaveTitle(newTitle);
   };
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
-    if (socket) {
-      socket.emit('content-change', { roomId, content: newContent });
-    }
-    // Debounced save to database
-    setTimeout(() => saveToDatabase(undefined, newContent), 1000);
+    debouncedContentBroadcast(newContent);
+    debouncedSaveContent(newContent);
   };
 
   const handleCopyContent = async () => {
     try {
       await navigator.clipboard.writeText(content);
-      alert('Editor content copied to clipboard!');
+      toast.success('Editor content copied to clipboard!');
     } catch (error) {
       // Fallback for browsers that don't support clipboard API
       const textArea = document.createElement('textarea');
@@ -118,9 +156,9 @@ export default function RoomPage() {
       textArea.select();
       try {
         document.execCommand('copy');
-        alert('Editor content copied to clipboard!');
+        toast.success('Editor content copied to clipboard!');
       } catch (err) {
-        alert('Failed to copy content to clipboard');
+        toast.error('Failed to copy content to clipboard');
       }
       document.body.removeChild(textArea);
     }
@@ -134,13 +172,21 @@ export default function RoomPage() {
           text: 'Check out this collaborative document!',
           url: window.location.href,
         });
+        toast.success('Shared successfully!');
       } catch (error) {
-        // User cancelled or share failed
-        console.log('Share cancelled or failed');
+        // User cancelled or share failed - only show error if it's not user cancellation
+        if (error instanceof Error && error.name !== 'AbortError') {
+          toast.error('Failed to share');
+        }
       }
     } else {
-      // Fallback - you could show a modal with share options
-      alert('Share not supported on this browser');
+      // Fallback - copy URL to clipboard instead
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Share URL copied to clipboard!');
+      } catch (error) {
+        toast.error('Share not supported on this browser');
+      }
     }
   };
 
@@ -156,7 +202,7 @@ export default function RoomPage() {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-3 sm:px-4 lg:px-6 py-3 flex items-center justify-between min-h-[60px] flex-shrink-0">
         <div className="flex items-center flex-1 min-w-0">
