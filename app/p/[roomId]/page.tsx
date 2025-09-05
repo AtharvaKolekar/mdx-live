@@ -24,43 +24,7 @@ export default function RoomPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-  useEffect(() => {
-    // Initialize Socket.IO connection
-    const socketInstance = io();
-    setSocket(socketInstance);
-
-    // Join the room
-    socketInstance.emit('join-room', roomId);
-
-    // Listen for real-time updates
-    socketInstance.on('room-data', (data) => {
-      console.log('Received room-data:', data);
-      // Ensure proper title handling even for empty strings
-      setTitle(data.title !== undefined ? data.title : '');
-      setContent(data.content || '');
-    });
-
-    socketInstance.on('content-changed', (data) => {
-      console.log('Received content-changed:', data);
-      setContent(data.content);
-    });
-
-    socketInstance.on('title-changed', (data) => {
-      console.log('Received title-changed:', data);
-      // Ensure proper title handling even for empty strings
-      setTitle(data.title !== undefined ? data.title : '');
-    });
-
-    // Fetch initial room data
-    fetchRoom();
-
-    return () => {
-      socketInstance.emit('leave-room', roomId);
-      socketInstance.disconnect();
-    };
-  }, [roomId]); // Added fetchRoom dependency warning fix
-
-  // Add fetchRoom as a separate useCallback to avoid dependency issues
+  // Add fetchRoom as a useCallback to avoid dependency issues
   const fetchRoom = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -87,6 +51,35 @@ export default function RoomPage() {
       setIsLoading(false);
     }
   }, [roomId]);
+
+  useEffect(() => {
+    // Initialize Socket.IO connection
+    const socketInstance = io();
+    setSocket(socketInstance);
+
+    // Join the room
+    socketInstance.emit('join-room', roomId);
+
+    // Listen for real-time updates from other users (not initial room data)
+    socketInstance.on('content-changed', (data) => {
+      console.log('Received content-changed:', data);
+      setContent(data.content);
+    });
+
+    socketInstance.on('title-changed', (data) => {
+      console.log('Received title-changed:', data);
+      // Ensure proper title handling even for empty strings
+      setTitle(data.title !== undefined ? data.title : '');
+    });
+
+    // Fetch initial room data from database (this should take priority)
+    fetchRoom();
+
+    return () => {
+      socketInstance.emit('leave-room', roomId);
+      socketInstance.disconnect();
+    };
+  }, [roomId, fetchRoom]);
 
   const saveToDatabase = async (newTitle?: string, newContent?: string) => {
     try {
@@ -205,10 +198,10 @@ export default function RoomPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Loading room...</h1>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center flex flex-col items-center">
+          <span className="loader"></span>
+          <p className="mt-4 text-gray-600">Opening your Notepad...</p>
         </div>
       </div>
     );

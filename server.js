@@ -39,10 +39,8 @@ app.prepare().then(() => {
       socket.join(roomId);
       console.log(`User ${socket.id} joined room ${roomId}`);
       
-      // Send current room data to newly joined user
-      if (rooms.has(roomId)) {
-        socket.emit('room-data', rooms.get(roomId));
-      }
+      // Don't send room-data anymore - let the frontend fetch from database
+      // This prevents Socket.IO from overriding database data
     });
 
     socket.on('content-change', (data) => {

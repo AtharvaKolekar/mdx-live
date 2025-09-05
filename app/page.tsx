@@ -17,11 +17,11 @@ export default function Home() {
   }, [router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">MDX Live Editor</h1>
-        <p className="text-gray-600">Redirecting to a new room...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center flex flex-col items-center">
+          <span className="loader"></span>
+          <p className="mt-4 text-gray-600">Creating a new Notepad...</p>
+        </div>
       </div>
-    </div>
   );
 }
