@@ -148,14 +148,6 @@ export default function RoomPage() {
     debouncedContentBroadcast(newContent);
     debouncedSaveContent(newContent);
   };
-  function escapeControlCharacters(str: string) {
-  return str
-    .replace(/\n/g, '\\n')  // Replace all newline characters with '\n'
-    .replace(/\r/g, '\\r')  // Replace all carriage return characters with '\r'
-    .replace(/\t/g, '\\t')  // Replace all tab characters with '\t'
-    .replace(/\f/g, '\\f')  // Replace all form feed characters with '\f')
-    .replace(/\v/g, '\\v');  // Replace all vertical tab characters with '\v')
-}
 
   const handleCopyContent = async () => {
     try {
@@ -163,6 +155,7 @@ export default function RoomPage() {
       let cleanedContent = content
         .replace(/\\/g, '')     // Remove all backslashes
         .replace(/\n\n/g, '\n') // Replace double newlines with single newlines
+        .replace(/\u00A0/g, ' ') // Replace non-breaking space (U+00A0) with regular space
         // Decode HTML entities
         .replace(/&#x20;/g, ' ')   // Space
         .replace(/&#x21;/g, '!')   // Exclamation mark
@@ -219,6 +212,7 @@ export default function RoomPage() {
       let cleanedContent = content
         .replace(/\\/g, '')     // Remove all backslashes
         .replace(/\n\n/g, '\n') // Replace double newlines with single newlines
+        .replace(/\u00A0/g, ' ') // Replace non-breaking space (U+00A0) with regular space
         // Decode HTML entities (same as above)
         .replace(/&#x20;/g, ' ')
         .replace(/&#x21;/g, '!')
@@ -333,7 +327,7 @@ export default function RoomPage() {
             className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
             title="Copy editor content"
           >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
           </button>
