@@ -142,11 +142,22 @@ export default function RoomPage() {
     debouncedTitleBroadcast(newTitle);
     debouncedSaveTitle(newTitle);
   };
-
+function escapeControlCharacters(str: string) {
+  return str
+    .replace(/\n/g, '\\n')  // Replace all newline characters with '\n'
+    .replace(/\r/g, '\\r')  // Replace all carriage return characters with '\r'
+    .replace(/\t/g, '\\t')  // Replace all tab characters with '\t'
+    .replace(/\f/g, '\\f')  // Replace all form feed characters with '\f')
+    .replace(/\v/g, '\\v');  // Replace all vertical tab characters with '\v')
+}
   const handleContentChange = (newContent: string) => {
-    setContent(newContent);
-    debouncedContentBroadcast(newContent);
-    debouncedSaveContent(newContent);
+    const cleanedContent = newContent
+    // .replace(/\n\n/g, '\n') // Normalize Windows line endings to Unix
+    // .replace(/\\/g, '');  // Normalize any remaining backslashes to Unix
+    console.log('Content changed:', escapeControlCharacters(cleanedContent));
+    setContent(cleanedContent);
+    debouncedContentBroadcast(cleanedContent);
+    debouncedSaveContent(cleanedContent);
   };
 
   const handleCopyContent = async () => {

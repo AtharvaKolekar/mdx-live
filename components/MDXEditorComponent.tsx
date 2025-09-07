@@ -18,6 +18,8 @@ import {
   frontmatterPlugin,
   sandpackPlugin,
   toolbarPlugin,
+  directivesPlugin,
+  AdmonitionDirectiveDescriptor,
   UndoRedo,
   BoldItalicUnderlineToggles,
   CodeToggle,
@@ -31,6 +33,7 @@ import {
   InsertCodeBlock,
   ChangeCodeMirrorLanguage,
   InsertSandpack,
+  InsertAdmonition,
   HighlightToggle,
   
   type MDXEditorMethods,
@@ -45,7 +48,7 @@ const optimizedSandpackConfig: SandpackConfig = {
     {
       label: 'React',
       name: 'react',
-      meta: 'live react',
+      meta: 'live',
       sandpackTemplate: 'react',
       sandpackTheme: 'light',
       snippetFileName: '/App.js',
@@ -113,13 +116,37 @@ export function MDXEditorComponent({ content, onChange }: MDXEditorComponentProp
           // Link plugins
           linkPlugin(),
           linkDialogPlugin(),
+
+          directivesPlugin({ directiveDescriptors: [AdmonitionDirectiveDescriptor] }),
           
           // Image plugin
           imagePlugin({
             imageUploadHandler: async (image) => {
-              // For now, return a placeholder URL
-              // In a real app, you'd upload to a service like Cloudinary
-              return Promise.resolve('/placeholder-image.jpg');
+              try {
+                const formData = new FormData();
+                formData.append('image', image);
+
+                const response = await fetch('https://api.athrva.in/upload', {
+                  method: 'POST',
+                  body: formData,
+                });
+
+                if (!response.ok) {
+                  throw new Error(`Upload failed: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.status === 'success' && result.data && result.data.length > 0) {
+                  return result.data[0].url;
+                } else {
+                  throw new Error('Invalid response format');
+                }
+              } catch (error) {
+                console.error('Image upload failed:', error);
+                // Fallback to a placeholder or rethrow the error
+                throw error;
+              }
             },
           }),
           
@@ -175,6 +202,8 @@ export function MDXEditorComponent({ content, onChange }: MDXEditorComponentProp
                 <Separator />
                 <InsertCodeBlock />
                 <InsertSandpack />
+                <Separator />
+                <InsertAdmonition />
               </>
             ),
           }),
